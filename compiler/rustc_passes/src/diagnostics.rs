@@ -13,33 +13,11 @@ use crate::check_attr::ProcMacroKind;
 use crate::lang_items::Duplicate;
 
 #[derive(Diagnostic)]
-#[diag("`#[diagnostic::do_not_recommend]` can only be placed on trait implementations")]
-pub(crate) struct IncorrectDoNotRecommendLocation;
-
-#[derive(Diagnostic)]
-#[diag("`#[loop_match]` should be applied to a loop")]
-pub(crate) struct LoopMatchAttr {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label("not a loop")]
-    pub node_span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("`#[loop_bound]` should be applied to a loop")]
 pub(crate) struct LoopBoundAttr {
     #[primary_span]
     pub attr_span: Span,
     #[label("not a loop")]
-    pub node_span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("`#[const_continue]` should be applied to a break expression")]
-pub(crate) struct ConstContinueAttr {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label("not a break expression")]
     pub node_span: Span,
 }
 

@@ -557,13 +557,6 @@ impl ModuleKind {
             ModuleKind::Block => true,
         }
     }
-
-    fn opt_def_id(&self) -> Option<DefId> {
-        match self {
-            ModuleKind::Def(_, def_id, _) => Some(*def_id),
-            _ => None,
-        }
-    }
 }
 
 /// Combination of a symbol and its macros 2.0 normalized hygiene context.
@@ -1182,9 +1175,9 @@ impl<'ra> DeclData<'ra> {
     fn is_ambiguity_recursive(&self) -> bool {
         self.ambiguity.get().is_some()
             || match self.kind {
-                DeclKind::Import { source_decl, .. } => source_decl.is_ambiguity_recursive(),
-                _ => false,
-            }
+            DeclKind::Import { source_decl, .. } => source_decl.is_ambiguity_recursive(),
+            _ => false,
+        }
     }
 
     fn is_possibly_imported_variant(&self) -> bool {
@@ -2568,17 +2561,17 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 self.tcx.def_kind(def_id),
                 DefKind::Struct | DefKind::Union | DefKind::Variant
             ) =>
-            {
-                Some(
-                    self.tcx
-                        .associated_item_def_ids(def_id)
-                        .iter()
-                        .map(|&def_id| {
-                            Ident::new(self.tcx.item_name(def_id), self.tcx.def_span(def_id))
-                        })
-                        .collect(),
-                )
-            }
+                {
+                    Some(
+                        self.tcx
+                            .associated_item_def_ids(def_id)
+                            .iter()
+                            .map(|&def_id| {
+                                Ident::new(self.tcx.item_name(def_id), self.tcx.def_span(def_id))
+                            })
+                            .collect(),
+                    )
+                }
             _ => None,
         }
     }
@@ -2590,17 +2583,17 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 self.tcx.def_kind(def_id),
                 DefKind::Struct | DefKind::Union | DefKind::Variant
             ) =>
-            {
-                Some(
-                    self.tcx
-                        .associated_item_def_ids(def_id)
-                        .iter()
-                        .filter_map(|&def_id| {
-                            self.tcx.default_field(def_id).map(|_| self.tcx.item_name(def_id))
-                        })
-                        .collect(),
-                )
-            }
+                {
+                    Some(
+                        self.tcx
+                            .associated_item_def_ids(def_id)
+                            .iter()
+                            .filter_map(|&def_id| {
+                                self.tcx.default_field(def_id).map(|_| self.tcx.item_name(def_id))
+                            })
+                            .collect(),
+                    )
+                }
             _ => None,
         }
     }
@@ -2632,7 +2625,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             self.tcx, def_id,
             RustcLegacyConstGenerics{fn_indexes,..} => fn_indexes
         )
-        .map(|fn_indexes| fn_indexes.iter().map(|(num, _)| *num).collect())
+            .map(|fn_indexes| fn_indexes.iter().map(|(num, _)| *num).collect())
     }
 
     fn resolve_main(&mut self) {

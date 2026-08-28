@@ -184,8 +184,8 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             AttributeKind::ProcMacro => {
                 self.check_proc_macro(hir_id, target, ProcMacroKind::FunctionLike)
             }
-            AttributeKind::LoopBound => {
-                    self.check_loop_bound(hir_id, *attr_span, target)
+            AttributeKind::LoopBound { span, .. } => {
+                self.check_loop_bound(hir_id, *span, target)
             }
             AttributeKind::ProcMacroAttribute => {
                 self.check_proc_macro(hir_id, target, ProcMacroKind::Attribute);
@@ -1653,7 +1653,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         };
 
         if !is_loop {
-            self.dcx().emit_err(errors::LoopBoundAttr { attr_span, node_span });
+            self.dcx().emit_err(crate::diagnostics::LoopBoundAttr { attr_span, node_span });
         }
     }
 }

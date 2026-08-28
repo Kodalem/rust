@@ -5,7 +5,6 @@
 )]
 #![feature(ascii_char)]
 #![feature(ascii_char_variants)]
-#![feature(assert_matches)]
 #![feature(deref_patterns)]
 #![feature(file_buffered)]
 #![feature(formatting_options)]

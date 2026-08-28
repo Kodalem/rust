@@ -419,6 +419,7 @@ symbols! {
         arm_a32: "arm::a32",
         arm_t32: "arm::t32",
         arm_target_feature,
+        patmos,
         array,
         as_dash_needed: "as-needed",
         as_ref,

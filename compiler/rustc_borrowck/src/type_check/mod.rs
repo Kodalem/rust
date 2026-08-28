@@ -731,7 +731,8 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
             | StatementKind::BackwardIncompatibleDropHint { .. }
             | StatementKind::Nop => {}
             StatementKind::Intrinsic(NonDivergingIntrinsic::CopyNonOverlapping(..))
-            | StatementKind::Intrinsic(box NonDivergingIntrinsic::LoopBound { .. }) => {}
+            // Reintroduce box again later?
+            | StatementKind::Intrinsic(NonDivergingIntrinsic::LoopBound { .. }) => {}
             StatementKind::SetDiscriminant { .. } => {
                 bug!("Statement not allowed in this MIR phase")
             }

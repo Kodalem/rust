@@ -3397,7 +3397,8 @@ fn add_static_crate(
     // `lto_whole_archive_sysroot_crates` forces it to always be whole-archived when
     // linker-plugin-LTO is active, mirroring Clang's Patmos driver behaviour, which always merges
     // all of compiler-rt's bitcode unconditionally rather than relying on symbol-driven extraction.
-    let crate_name = codegen_results.crate_info.crate_name[&cnum];
+
+    let crate_name = crate_info.crate_name[&cnum];
     let whole_archive = sess.opts.cg.linker_plugin_lto.enabled()
         && sess
             .target
@@ -3419,7 +3420,7 @@ fn add_static_crate(
             let mut archive = archive_builder_builder.new_archive_builder(sess);
             if let Err(error) = archive.add_archive(
                 cratepath,
-                Box::new(move |f| f == METADATA_FILENAME),
+                AddArchiveKind::Rlib(rmeta_link_cache, &|f, _| f == METADATA_FILENAME),
             ) {
                 // TODO: Emit a better suggestion
                 sess.dcx().emit_fatal(errors::RlibArchiveBuildFailure {
@@ -3427,7 +3428,7 @@ fn add_static_crate(
                     error,
                 });
             }
-            if archive.build(&dst) {
+            if archive.build(&dst, None) {
                 link_upstream(&dst);
             }
         } else {

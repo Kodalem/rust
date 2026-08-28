@@ -7059,3 +7059,8 @@ name = "zlib-rs"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3be3d40e40a133f9c916ee3f9f4fa2d9d63435b5fbe1bfc6d9dae0aa0ada1513"
+
+[[patch.unused]]
+name = "cc"
+version = "1.4.3"
+source = "git+https://github.com/Kodalem/cc-rs?branch=patmos#587c17a81b21df647803cc022e2b189e4b9a4171"

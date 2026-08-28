@@ -1508,7 +1508,8 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                     );
                 }
             }
-            StatementKind::Intrinsic(box NonDivergingIntrinsic::LoopBound { .. }) => {
+            // Reintroduce box again later?
+            StatementKind::Intrinsic(NonDivergingIntrinsic::LoopBound { .. }) => {
                 // Loop bound intrinsic for WCET analysis - no validation needed... I think?
                 // TODO Make some internal research on this
             }

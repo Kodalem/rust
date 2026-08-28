@@ -17,9 +17,7 @@ use rustc_span::{DUMMY_SP, Span, Symbol, kw, sym};
 use rustc_type_ir::TyKind::*;
 use rustc_type_ir::solve::SizedTraitKind;
 use rustc_type_ir::walk::TypeWalker;
-use rustc_type_ir::{
-    self as ir, BoundVar, CollectAndApply, MayBeErased, TypeVisitableExt, elaborate,
-};
+use rustc_type_ir::{self as ir, elaborate, BoundVar, CollectAndApply, MayBeErased, TypeVisitableExt};
 use tracing::instrument;
 use ty::util::IntTypeExt;
 
@@ -528,13 +526,13 @@ impl<'tcx> Ty<'tcx> {
                 ValTree::from_scalar_int(tcx, variant.as_u32().into()),
                 tcx.types.u32,
             )
-            .into(),
+                .into(),
             Const::new_value(
                 tcx,
                 ValTree::from_scalar_int(tcx, field.as_u32().into()),
                 tcx.types.u32,
             )
-            .into(),
+                .into(),
         ]);
         Ty::new_adt(tcx, def, args)
     }
@@ -775,15 +773,15 @@ impl<'tcx> Ty<'tcx> {
                     tcx,
                     ty::Binder::dummy(ty::TraitRef::identity(tcx, principal_def_id)),
                 )
-                .map(|principal| {
-                    tcx.associated_items(principal.def_id())
-                        .in_definition_order()
-                        .filter(|item| item.is_type() || item.is_type_const())
-                        .filter(|item| !item.is_impl_trait_in_trait())
-                        .filter(|item| !tcx.generics_require_sized_self(item.def_id))
-                        .count()
-                })
-                .sum()
+                    .map(|principal| {
+                        tcx.associated_items(principal.def_id())
+                            .in_definition_order()
+                            .filter(|item| item.is_type() || item.is_type_const())
+                            .filter(|item| !item.is_impl_trait_in_trait())
+                            .filter(|item| !tcx.generics_require_sized_self(item.def_id))
+                            .count()
+                    })
+                    .sum()
             });
             assert_eq!(
                 projection_count, expected_count,
@@ -1428,11 +1426,11 @@ impl<'tcx> Ty<'tcx> {
     ) -> Option<(Ty<'tcx>, ty::Pinnedness, ty::Mutability, Region<'tcx>)> {
         match self.kind() {
             Adt(def, args)
-                if def.is_pin()
-                    && let &ty::Ref(region, ty, mutbl) = args.type_at(0).kind() =>
-            {
-                Some((ty, ty::Pinnedness::Pinned, mutbl, region))
-            }
+            if def.is_pin()
+                && let &ty::Ref(region, ty, mutbl) = args.type_at(0).kind() =>
+                {
+                    Some((ty, ty::Pinnedness::Pinned, mutbl, region))
+                }
             &Ref(region, ty, mutbl) => Some((ty, ty::Pinnedness::Not, mutbl, region)),
             _ => None,
         }

@@ -339,7 +339,7 @@ impl InlineAsmReg {
             Self::Msp430(r) => r.name().into(),
             Self::M68k(r) => r.name().into(),
             Self::CSKY(r) => r.name().into(),
-            Self::Patmos(r) => r.name(),
+            Self::Patmos(r) => r.name().into(),
             Self::Err => "<reg>".into(),
         }
     }
@@ -683,7 +683,7 @@ impl InlineAsmRegClass {
             Self::Msp430(r) => r.supported_types(arch).into(),
             Self::M68k(r) => r.supported_types(arch).into(),
             Self::CSKY(r) => r.supported_types(arch).into(),
-            Self::Patmos(r) => r.supported_types(arch),
+            Self::Patmos(r) => r.supported_types(arch).into(),
             Self::Err => unreachable!("Use of InlineAsmRegClass::Err"),
         }
     }

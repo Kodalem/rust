@@ -1,6 +1,6 @@
 use super::prelude::*;
 
-use crate::diagnostics::{InvalidAlignmentValue, LoopBoundInvalidRange};
+use crate::session_diagnostics::{InvalidAlignmentValue, LoopBoundInvalidRange};
 use rustc_ast;
 use rustc_feature::AttributeStability;
 

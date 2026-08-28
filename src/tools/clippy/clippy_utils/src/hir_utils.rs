@@ -1020,40 +1020,6 @@ impl HirEqInterExpr<'_, '_, '_> {
             }),
         }
     }
-
-    fn swap_binop<'a>(
-        &self,
-        binop: BinOpKind,
-        lhs: &'a Expr<'a>,
-        rhs: &'a Expr<'a>,
-    ) -> Option<(BinOpKind, &'a Expr<'a>, &'a Expr<'a>)> {
-        match binop {
-            // `==` and `!=`, are commutative
-            BinOpKind::Eq | BinOpKind::Ne => Some((binop, rhs, lhs)),
-            // Comparisons can be reversed
-            BinOpKind::Lt => Some((BinOpKind::Gt, rhs, lhs)),
-            BinOpKind::Le => Some((BinOpKind::Ge, rhs, lhs)),
-            BinOpKind::Ge => Some((BinOpKind::Le, rhs, lhs)),
-            BinOpKind::Gt => Some((BinOpKind::Lt, rhs, lhs)),
-            // Non-commutative operators
-            BinOpKind::Shl | BinOpKind::Shr | BinOpKind::Rem | BinOpKind::Sub | BinOpKind::Div => None,
-            // We know that those operators are commutative for primitive types,
-            // and we don't assume anything for other types
-            BinOpKind::Mul
-            | BinOpKind::Add
-            | BinOpKind::And
-            | BinOpKind::Or
-            | BinOpKind::BitAnd
-            | BinOpKind::BitXor
-            | BinOpKind::BitOr => self.inner.maybe_typeck_results.and_then(|(typeck_lhs, _)| {
-                typeck_lhs
-                    .expr_ty_adjusted(lhs)
-                    .peel_refs()
-                    .is_primitive()
-                    .then_some((binop, rhs, lhs))
-            }),
-        }
-    }
 }
 
 /// Some simple reductions like `{ return }` => `return`
