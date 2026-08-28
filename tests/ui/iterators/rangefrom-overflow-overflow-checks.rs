@@ -3,6 +3,7 @@
 //@ compile-flags: -O -C overflow-checks=yes
 
 #![feature(new_range_remainder)]
+#![feature(new_range_remainder)]
 
 use std::panic;
 

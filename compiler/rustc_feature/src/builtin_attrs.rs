@@ -202,6 +202,16 @@ pub static BUILTIN_ATTRIBUTES: &[Symbol] = &[
     sym::const_continue,
     sym::loop_match,
 
+    // The "#[loopbound] pragma for Patmos required by Platin to do WCET
+    // Old implementation:
+    //    gated!(
+    //         loop_bound, Normal,
+    //         template!(List: &[r#"min = "min_value", max = "max_value""#]),
+    //         ErrorFollowing,
+    //         EncodeCrossCrate::No, loop_bound, experimental!(loop_bound)
+    //     ),
+    sym::loop_bound,
+
     // The `#[pin_v2]` attribute is part of the `pin_ergonomics` experiment
     // that allows structurally pinning, tracked in:
     //

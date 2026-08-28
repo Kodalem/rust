@@ -3,6 +3,7 @@
 //@ compile-flags: -O -C debug_assertions=yes
 
 #![feature(new_range_remainder)]
+#![feature(new_range_remainder)]
 
 use std::panic;
 

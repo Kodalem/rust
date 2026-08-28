@@ -1009,6 +1009,15 @@ pub(crate) struct UnsupportedInstructionSet<'a> {
 }
 
 #[derive(Diagnostic)]
+#[diag("loop_bound min value `{min}` must be less than or equal to max value `{max}`")]
+pub(crate) struct LoopBoundInvalidRange {
+    #[primary_span]
+    pub span: Span,
+    pub min: u64,
+    pub max: u64,
+}
+
+#[derive(Diagnostic)]
 #[diag("`dialect` key required")]
 pub(crate) struct CustomMirPhaseRequiresDialect {
     #[primary_span]

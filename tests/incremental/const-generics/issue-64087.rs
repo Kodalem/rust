@@ -8,4 +8,6 @@ fn main() {
     //[bfail1]~^ ERROR type annotations needed
     //[bfail1]~| ERROR type annotations needed
     //[bfail1]~| ERROR type annotations needed
+    //[cfail1]~| ERROR type annotations needed
+    //[cfail1]~| ERROR type annotations needed
 }

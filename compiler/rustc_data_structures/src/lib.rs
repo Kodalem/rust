@@ -15,6 +15,7 @@
 #![feature(allocator_api)]
 #![feature(ascii_char)]
 #![feature(ascii_char_variants)]
+#![feature(assert_matches)]
 #![feature(auto_traits)]
 #![feature(const_default)]
 #![feature(const_trait_impl)]

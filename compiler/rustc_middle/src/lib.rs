@@ -30,6 +30,7 @@
 #![cfg_attr(bootstrap, feature(box_as_ptr))]
 #![cfg_attr(doc, feature(intra_doc_pointers))]
 #![feature(allocator_api)]
+#![feature(assert_matches)]
 #![feature(associated_type_defaults)]
 #![feature(closure_track_caller)]
 #![feature(const_default)]

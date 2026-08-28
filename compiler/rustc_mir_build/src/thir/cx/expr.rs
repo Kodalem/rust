@@ -977,6 +977,11 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 match_source,
             },
             hir::ExprKind::Loop(body, ..) => {
+                // Check for loop_bound attribute
+                let bound = find_attr!(self.tcx.hir_attrs(expr.hir_id), LoopBound { min, max, .. } => {
+                    rustc_middle::thir::LoopBound { min: *min, max: *max }
+                });
+
                 if find_attr!(self.tcx, expr.hir_id, LoopMatch(_)) {
                     let dcx = self.tcx.dcx();
 
@@ -1044,6 +1049,11 @@ impl<'tcx> ThirBuildCx<'tcx> {
                         })
                     }
 
+                    // loop_bound takes precedence - emit error if both are present
+                    if bound.is_some() {
+                        dcx.emit_fatal(LoopBoundWithLoopMatch { span: expr.span });
+                    }
+
                     ExprKind::LoopMatch {
                         state: self.mirror_expr(state),
                         region_scope: region::Scope {
@@ -1066,7 +1076,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
                         span: self.thir[block].span,
                         kind: ExprKind::Block { block },
                     });
-                    ExprKind::Loop { body }
+                    ExprKind::LoopBound { body, bound }
                 }
             }
             hir::ExprKind::Field(source, ..) => ExprKind::Field {

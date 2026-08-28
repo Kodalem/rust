@@ -557,6 +557,13 @@ impl ModuleKind {
             ModuleKind::Block => true,
         }
     }
+
+    fn opt_def_id(&self) -> Option<DefId> {
+        match self {
+            ModuleKind::Def(_, def_id, _) => Some(*def_id),
+            _ => None,
+        }
+    }
 }
 
 /// Combination of a symbol and its macros 2.0 normalized hygiene context.

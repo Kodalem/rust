@@ -1824,6 +1824,9 @@ supported_targets! {
     ("x86_64-pc-cygwin", x86_64_pc_cygwin),
 
     ("x86_64-unknown-linux-gnuasan", x86_64_unknown_linux_gnuasan),
+
+    ("patmos-unknown-none", patmos_unknown_none),
+
     ("x86_64-unknown-linux-gnumsan", x86_64_unknown_linux_gnumsan),
     ("x86_64-unknown-linux-gnutsan", x86_64_unknown_linux_gnutsan),
 
@@ -1915,6 +1918,7 @@ crate::target_spec_enum! {
         X86 = "x86",
         X86_64 = "x86_64",
         Xtensa = "xtensa",
+        Patmos = "patmos",
     }
     other_variant = Other;
 }
@@ -1952,6 +1956,7 @@ impl Arch {
             Self::X86 => sym::x86,
             Self::X86_64 => sym::x86_64,
             Self::Xtensa => sym::xtensa,
+            Self::Patmos => sym::patmos,
             Self::Other(name) => rustc_span::Symbol::intern(name),
         }
     }
@@ -1964,6 +1969,7 @@ impl Arch {
             AArch64 | RiscV32 | RiscV64 => true,
             AmdGpu | Arm | Arm64EC | Avr | Bpf | CSky | Hexagon | LoongArch32 | LoongArch64
             | M68k | Mips | Mips32r6 | Mips64 | Mips64r6 | Msp430 | Nvptx64 | PowerPC
+            | Patmos
             | PowerPC64 | S390x | Sparc | Sparc64 | SpirV | Wasm32 | Wasm64 | X86 | X86_64
             | Xtensa | Other(_) => false,
         }
@@ -2209,7 +2215,7 @@ impl Target {
 
         match self.arch {
             // These targets just inherently do not support c-variadic definitions.
-            Bpf | SpirV => CVariadicStatus::NotSupported,
+            Bpf | Patmos | SpirV => CVariadicStatus::NotSupported,
 
             // The c-variadic ABI for this target may change in the future, per this comment in
             // clang:
@@ -2646,6 +2652,27 @@ pub struct TargetOptions {
     /// Additional arguments to pass to LLVM, similar to the `-C llvm-args` codegen option.
     pub llvm_args: StaticCow<[StaticCow<str>]>,
 
+    // TODO / Unstable (as hecc) - This implementation is a bandaid to add compiler-rt like
+    // behaviour onto the Rust compiler, which in turn we need to rebuild rustc "core" everytime
+    // when we want to use floats in the Rust code, hemorrhaging with the increased compile times.
+    // There should be a better implementation long term use of this compiler fork!
+
+    // Also see rust/compiler/rustc_codegen_ssa/src/back/link.rs
+
+    /// Names of upstream sysroot crates (e.g. "compiler_builtins") that should always be
+    /// statically linked with `--whole-archive` (or platform equivalent) semantics, but only
+    /// when `-C linker-plugin-lto` is also active for this build. This exists for targets
+    /// (like Patmos) whose whole-program bitcode needs every symbol from these
+    /// crates unconditionally present in the single merged module before final codegen, which
+    /// mirrors how Clang's Patmos driver always fully merges compiler-rt's bitcode
+    /// (fyi: all of compiler-rt must always be available) rather than relying on ordinary
+    /// undefined-symbol-driven archive extraction, which cannot see library calls that are only
+    /// synthesized later during SelectionDAG legalization (soft-float helpers like
+    /// `__adddf3`) and therefore never appear as an unresolved reference at link time.
+    /// Defaults to empty, meaning no behavior change from ordinary (non-whole-archive) static
+    /// linking for any target that doesn't explicitly opt in.
+    pub lto_whole_archive_sysroot_crates: StaticCow<[StaticCow<str>]>,
+
     /// Whether to use legacy .ctors initialization hooks rather than .init_array. Defaults
     /// to false (uses .init_array).
     pub use_ctors_section: bool,
@@ -2929,6 +2956,7 @@ impl Default for TargetOptions {
             rustc_abi: None,
             relax_elf_relocations: false,
             llvm_args: cvs![],
+            lto_whole_archive_sysroot_crates: cvs![],
             use_ctors_section: false,
             eh_frame_header: true,
             has_thumb_interworking: false,
@@ -3866,6 +3894,7 @@ impl Target {
             | Arch::SpirV
             | Arch::Wasm32
             | Arch::Wasm64
+            | Arch::Patmos
             | Arch::Other(_) => return None,
         })
     }

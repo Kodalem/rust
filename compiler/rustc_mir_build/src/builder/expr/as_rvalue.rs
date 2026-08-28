@@ -389,7 +389,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             | ExprKind::Borrow { .. }
             | ExprKind::RawBorrow { .. }
             | ExprKind::Adt { .. }
-            | ExprKind::Loop { .. }
+            | ExprKind::LoopBound { .. }
             | ExprKind::LoopMatch { .. }
             | ExprKind::LogicalOp { .. }
             | ExprKind::Call { .. }

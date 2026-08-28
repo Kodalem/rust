@@ -463,6 +463,7 @@ pub struct CopyNonOverlapping {
 pub enum NonDivergingIntrinsic {
     Assume(Operand),
     CopyNonOverlapping(CopyNonOverlapping),
+    LoopBound { min: Operand, max: Operand },
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]

@@ -147,6 +147,8 @@ macro_rules! assert_ne {
 /// # Examples
 ///
 /// ```
+/// #![feature(assert_matches)]
+///
 /// use std::assert_matches;
 ///
 /// let a = Some(345);
@@ -375,6 +377,8 @@ macro_rules! debug_assert_ne {
 /// # Examples
 ///
 /// ```
+/// #![feature(assert_matches)]
+///
 /// use std::debug_assert_matches;
 ///
 /// let a = Some(345);

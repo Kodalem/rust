@@ -616,6 +616,8 @@ declare_features! (
     (unstable, loop_hints, "1.98.0", Some(156874)),
     /// Allows fused `loop`/`match` for direct intraprocedural jumps.
     (incomplete, loop_match, "1.90.0", Some(132306)),
+    /// Allows loop bounds to be passed to LLVM for optimization.
+    (incomplete, loop_bound, "1.90.0", None),
     /// Target features on m68k.
     (unstable, m68k_target_feature, "1.85.0", Some(134328)),
     /// Allow `macro_rules!` attribute rules

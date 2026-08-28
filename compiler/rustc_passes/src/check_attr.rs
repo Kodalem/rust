@@ -184,6 +184,9 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             AttributeKind::ProcMacro => {
                 self.check_proc_macro(hir_id, target, ProcMacroKind::FunctionLike)
             }
+            AttributeKind::LoopBound => {
+                    self.check_loop_bound(hir_id, *attr_span, target)
+            }
             AttributeKind::ProcMacroAttribute => {
                 self.check_proc_macro(hir_id, target, ProcMacroKind::Attribute);
             }
@@ -1624,6 +1627,33 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         {
             self.dcx()
                 .emit_err(diagnostics::BothOptimizeNoneAndInline { optimize_span, inline_span });
+        }
+    }
+
+    // TODO: Make a discussion in writing how similar it is to the Clang's done loopbound work in the src/llvm-project/clang/test/CodeGen/Patmos/loopbounds.c et. al.
+    fn check_loop_bound(&self, hir_id: HirId, attr_span: Span, target: Target) {
+        use rustc_hir::Node;
+        let node_span = self.tcx.hir_span(hir_id);
+
+        if !matches!(target, Target::Expression | Target::Statement) {
+            return; // Handled in target checking during attr parse
+        }
+
+        // For expressions, check directly. For statements, check if it's a Semi containing a Loop
+        let is_loop = match self.tcx.hir_node(hir_id) {
+            Node::Expr(expr) => matches!(expr.kind, hir::ExprKind::Loop(..)),
+            Node::Stmt(stmt) => {
+                if let hir::StmtKind::Semi(expr) = stmt.kind {
+                    matches!(expr.kind, hir::ExprKind::Loop(..))
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        };
+
+        if !is_loop {
+            self.dcx().emit_err(errors::LoopBoundAttr { attr_span, node_span });
         }
     }
 }

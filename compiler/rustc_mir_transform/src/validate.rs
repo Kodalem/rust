@@ -1508,6 +1508,10 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                     );
                 }
             }
+            StatementKind::Intrinsic(box NonDivergingIntrinsic::LoopBound { .. }) => {
+                // Loop bound intrinsic for WCET analysis - no validation needed... I think?
+                // TODO Make some internal research on this
+            }
             StatementKind::Intrinsic(NonDivergingIntrinsic::CopyNonOverlapping(
                 CopyNonOverlapping { src, dst, count },
             )) => {

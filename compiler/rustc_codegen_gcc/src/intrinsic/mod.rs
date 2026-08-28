@@ -713,6 +713,14 @@ impl<'a, 'gcc, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tc
     fn retag_mem(&mut self, _ptr: Self::Value, _info: &RetagInfo<Self::Value>) {
         unimplemented!()
     }
+
+    fn emit_loop_bound(&mut self, _min: Self::Value, _max: Self::Value) {
+        // GCC doesn't have a direct equivalent to llvm.loop.bound.
+        // This intrinsic is primarily used for WCET analysis with LLVM.
+        // For GCC, we emit a no-op. The bounds information is not used.
+        // TODO: Consider using GCC's __builtin_assume or other mechanisms for
+        // loop bound hints if needed for WCET analysis.
+    }
 }
 
 impl<'a, 'gcc, 'tcx> ArgAbiBuilderMethods<'tcx> for Builder<'a, 'gcc, 'tcx> {

@@ -1226,6 +1226,7 @@ symbols! {
         loongarch_target_feature,
         loop_break_value,
         loop_hints,
+        loop_bound,
         loop_match,
         lr,
         lsx,

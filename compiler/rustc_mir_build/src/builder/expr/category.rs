@@ -84,7 +84,7 @@ impl Category {
             | ExprKind::StaticRef { .. }
             | ExprKind::NamedConst { .. } => Some(Category::Constant),
 
-            ExprKind::Loop { .. }
+            ExprKind::LoopBound { .. }
             | ExprKind::LoopMatch { .. }
             | ExprKind::Block { .. }
             | ExprKind::Break { .. }
