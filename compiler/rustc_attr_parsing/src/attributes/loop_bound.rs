@@ -1,23 +1,28 @@
 use super::prelude::*;
 
+use crate::diagnostics::{InvalidAlignmentValue, LoopBoundInvalidRange};
+use rustc_ast;
+use rustc_feature::AttributeStability;
+
 // TODO: Make a discussion in writing how similar it is to the Clang's done loopbound work in the src/llvm-project/clang/test/CodeGen/Patmos/loopbounds.c et. al.
 
 pub(crate) struct LoopBoundParser;
 
-impl<S: Stage> SingleAttributeParser<S> for LoopBoundParser {
+impl SingleAttributeParser for LoopBoundParser {
     const PATH: &[Symbol] = &[sym::loop_bound];
-    const ON_DUPLICATE: OnDuplicate<S> = OnDuplicate::Error;
-    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Expression)]);
+    const ON_DUPLICATE: OnDuplicate = OnDuplicate::Error;
+    const ALLOWED_TARGETS: AllowedTargets<'_> = AllowedTargets::AllowList(&[Allow(Target::Expression)]);
     const TEMPLATE: AttributeTemplate = template!(
         List: &[r#"min = "value", max = "value""#],
         "Loop bound attribute for passing bounds to LLVM"
     );
-    const ATTRIBUTE_ORDER: AttributeOrder = AttributeOrder::KeepInnermost;
+    const STABILITY: AttributeStability = unstable!(loop_bound);
 
     // TODO: Need to do better explaination of this.
-    fn convert(cx: &mut AcceptContext<'_, '_, S>, args: &ArgParser) -> Option<AttributeKind> {
+    fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
+        let attr_span = cx.attr_span;
         let ArgParser::List(list) = args else {
-            cx.expected_list(cx.attr_span, args);
+            cx.adcx().expected_list(attr_span, args);
             return None;
         };
 
@@ -26,20 +31,19 @@ impl<S: Stage> SingleAttributeParser<S> for LoopBoundParser {
 
         for param in list.mixed() {
             let Some(item) = param.meta_item() else {
-                cx.unexpected_literal(param.span());
+                cx.adcx().expected_not_literal(param.span());
                 return None;
             };
 
             let Some(name) = item.path().word().map(|ident| ident.name) else {
-                cx.emit_err(crate::session_diagnostics::InvalidAlignmentValue {
+                cx.emit_err(InvalidAlignmentValue {
                     span: item.span(),
-                    error_part: "expected a simple identifier",
+                    error_part: "expected a simple identifier".to_string(),
                 });
                 return None;
             };
 
-            let Some(nv) = item.args().name_value() else {
-                cx.expected_name_value(item.span(), None);
+            let Some(nv) = cx.expect_name_value(item.args(), item.span(), None) else {
                 return None;
             };
 
@@ -50,21 +54,21 @@ impl<S: Stage> SingleAttributeParser<S> for LoopBoundParser {
                     match min_val.0.try_into() {
                         Ok(val) => {
                             if min_value.is_some() {
-                                cx.duplicate_key(nv.value_span, name);
+                                cx.adcx().duplicate_key(nv.value_span, name);
                                 return None;
                             }
                             min_value = Some(val);
                         }
                         Err(_) => {
-                            cx.emit_err(crate::session_diagnostics::InvalidAlignmentValue {
+                            cx.emit_err(InvalidAlignmentValue {
                                 span: nv.value_span,
-                                error_part: "loop bound min value is too large for u64",
+                                error_part: "loop bound min value is too large for u64".to_string(),
                             });
                             return None;
                         }
                     }
                 } else {
-                    cx.expected_integer_literal(nv.value_span);
+                    cx.adcx().expected_integer_literal(nv.value_span);
                     return None;
                 }
             } else if name.as_str() == "max" {
@@ -72,27 +76,27 @@ impl<S: Stage> SingleAttributeParser<S> for LoopBoundParser {
                     match max_val.0.try_into() {
                         Ok(val) => {
                             if max_value.is_some() {
-                                cx.duplicate_key(nv.value_span, name);
+                                cx.adcx().duplicate_key(nv.value_span, name);
                                 return None;
                             }
                             max_value = Some(val);
                         }
                         Err(_) => {
-                            cx.emit_err(crate::session_diagnostics::InvalidAlignmentValue {
+                            cx.emit_err(InvalidAlignmentValue {
                                 span: nv.value_span,
-                                error_part: "loop bound max value is too large for u64",
+                                error_part: "loop bound max value is too large for u64".to_string(),
                             });
                             return None;
                         }
                     }
                 } else {
-                    cx.expected_integer_literal(nv.value_span);
+                    cx.adcx().expected_integer_literal(nv.value_span);
                     return None;
                 }
             } else {
-                cx.emit_err(crate::session_diagnostics::InvalidAlignmentValue {
+                cx.emit_err(InvalidAlignmentValue {
                     span: item.span(),
-                    error_part: "unexpected name in loop_bound attribute",
+                    error_part: "unexpected name in loop_bound attribute".to_string(),
                 });
                 return None;
             }
@@ -101,7 +105,10 @@ impl<S: Stage> SingleAttributeParser<S> for LoopBoundParser {
         let min_value = match min_value {
             Some(val) => val,
             None => {
-                cx.expected_name_value(cx.attr_span, None);
+                cx.emit_err(InvalidAlignmentValue {
+                    span: attr_span,
+                    error_part: "missing 'min' in loop_bound attribute".to_string(),
+                });
                 return None;
             }
         };
@@ -109,15 +116,18 @@ impl<S: Stage> SingleAttributeParser<S> for LoopBoundParser {
         let max_value = match max_value {
             Some(val) => val,
             None => {
-                cx.expected_name_value(cx.attr_span, None);
+                cx.emit_err(InvalidAlignmentValue {
+                    span: attr_span,
+                    error_part: "missing 'max' in loop_bound attribute".to_string(),
+                });
                 return None;
             }
         };
 
         // Validate that min <= max
         if min_value > max_value {
-            cx.emit_err(crate::session_diagnostics::LoopBoundInvalidRange {
-                span: cx.attr_span,
+            cx.emit_err(LoopBoundInvalidRange {
+                span: attr_span,
                 min: min_value,
                 max: max_value,
             });
@@ -127,7 +137,7 @@ impl<S: Stage> SingleAttributeParser<S> for LoopBoundParser {
         Some(AttributeKind::LoopBound {
             min: min_value,
             max: max_value,
-            span: cx.attr_span,
+            span: attr_span,
         })
     }
 }

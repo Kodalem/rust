@@ -1,7 +1,8 @@
-use rustc_abi::HasDataLayout;
+use rustc_abi::{HasDataLayout, Size};
 use rustc_abi::TyAbiInterface;
 
-use crate::callconv::{ArgAbi, FnAbi};
+// PassMode, ArgAttributes, CastTarget, Reg, and Uniform from localized scope
+use crate::callconv::{ArgAbi, FnAbi, PassMode, ArgAttributes, CastTarget, Reg, Uniform};
 
 /// Patmos ABI implementation.
 /// Based on the Patmos C calling convention as defined in the Patmos compiler.
@@ -44,12 +45,25 @@ where
         if size_bytes > 16 || *state + words > 6 {
             arg.make_indirect();
         } else {
-            arg.make_direct_deprecated();
+            // FIX: Box the CastTarget and supply missing fields
+            arg.mode = PassMode::Cast {
+                pad_i32: false,
+                cast: Box::new(CastTarget {
+                    prefix: Default::default(), // Handles empty prefix array types automatically
+                    rest: Uniform {
+                        unit: Reg::i32(),
+                        total: arg.layout.size,
+                        is_consecutive: false,
+                    },
+                    rest_offset: Some(Size::ZERO),
+                    attrs: ArgAttributes::new(),
+                }),
+            };
             *state += words;
         }
     } else {
         // Scalars: use registers r3-r8, then spill to stack
-        arg.make_direct_deprecated();
+        arg.mode = PassMode::Direct(ArgAttributes::new());
         if *state + words <= 6 {
             *state += words;
         } else {
@@ -76,9 +90,25 @@ where
         if fn_abi.ret.layout.is_aggregate() && ret_size > 8 {
             fn_abi.ret.make_indirect();
             reg_state += 1; // Pointer passed in r1
+        } else if fn_abi.ret.layout.is_aggregate() {
+            // FIX: Box the CastTarget and supply missing fields
+            fn_abi.ret.mode = PassMode::Cast {
+                pad_i32: false,
+                cast: Box::new(CastTarget {
+                    prefix: Default::default(),
+                    rest: Uniform {
+                        unit: Reg::i32(),
+                        total: fn_abi.ret.layout.size,
+                        is_consecutive: false,
+                    },
+                    rest_offset: Some(Size::ZERO),
+                    attrs: ArgAttributes::new(),
+                }),
+            };
+            let ret_words = ((ret_size + 3) / 4) as usize;
+            reg_state = ret_words.min(2);
         } else {
-            fn_abi.ret.make_direct_deprecated();
-            // Consume registers for the return value
+            fn_abi.ret.mode = PassMode::Direct(ArgAttributes::new());
             let ret_words = ((ret_size + 3) / 4) as usize;
             reg_state = ret_words.min(2); // Max 2 registers (r1, r2)
         }

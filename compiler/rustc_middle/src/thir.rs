@@ -265,7 +265,7 @@ pub struct Expr<'tcx> {
 }
 
 /// Loop bound information for `llvm.loop.bound` intrinsic generation.
-#[derive(Clone, Debug, HashStable, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, StableHash, TyEncodable, TyDecodable)]
 pub struct LoopBound {
     pub min: u64,
     pub max: u64,

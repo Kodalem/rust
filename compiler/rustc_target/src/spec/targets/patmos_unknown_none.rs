@@ -1,6 +1,6 @@
 use rustc_abi::Endian;
 
-use crate::spec::{Abi, Arch, PanicStrategy, RelocModel, Target, TargetMetadata, TargetOptions, cvs};
+use crate::spec::{CfgAbi, Arch, PanicStrategy, RelocModel, Target, TargetMetadata, TargetOptions, cvs};
 
 pub(crate) fn target() -> Target {
     let options = TargetOptions {
@@ -10,7 +10,7 @@ pub(crate) fn target() -> Target {
         vendor: "unknown".into(),
         cpu: "generic".into(),
         linker: std::env::var("CUSTOM_LINKER").ok().map(|s| s.into()),
-        abi: Abi::Ilp32,
+        cfg_abi: CfgAbi::Ilp32,
         max_atomic_width: Some(0),
         panic_strategy: PanicStrategy::Abort,
         relocation_model: RelocModel::Static,
