@@ -6819,3 +6819,8 @@ dependencies = [
  "quote",
  "syn 2.0.110",
 ]
+
+[[patch.unused]]
+name = "cc"
+version = "1.4.3"
+source = "git+https://github.com/Kodalem/cc-rs?branch=patmos#587c17a81b21df647803cc022e2b189e4b9a4171"
