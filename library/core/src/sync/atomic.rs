@@ -255,22 +255,26 @@ use crate::{fmt, intrinsics};
     reason = "implementation detail which may disappear or be replaced at any time",
     issue = "none"
 )]
-#[expect(missing_debug_implementations)]
 mod private {
     #[cfg(target_has_atomic_load_store = "8")]
     #[repr(C, align(1))]
+    #[expect(missing_debug_implementations)]
     pub struct Align1<T>(T);
     #[cfg(target_has_atomic_load_store = "16")]
     #[repr(C, align(2))]
+    #[expect(missing_debug_implementations)]
     pub struct Align2<T>(T);
     #[cfg(target_has_atomic_load_store = "32")]
     #[repr(C, align(4))]
+    #[expect(missing_debug_implementations)]
     pub struct Align4<T>(T);
     #[cfg(target_has_atomic_load_store = "64")]
     #[repr(C, align(8))]
+    #[expect(missing_debug_implementations)]
     pub struct Align8<T>(T);
     #[cfg(target_has_atomic_load_store = "128")]
     #[repr(C, align(16))]
+    #[expect(missing_debug_implementations)]
     pub struct Align16<T>(T);
 }
 
@@ -295,7 +299,7 @@ pub impl(self) unsafe trait AtomicPrimitive: Sized + Copy {
 }
 
 macro impl_atomic_primitive(
-    [$($T:ident)?] $Primitive:ty as $Storage:ident<$Operand:ty>, size($size:literal)
+[$($T:ident)?] $Primitive:ty as $Storage:ident<$Operand:ty>, size($size:literal)
 ) {
     #[unstable(
         feature = "atomic_internals",
@@ -358,6 +362,7 @@ impl_atomic_primitive!([T] *mut T as Align8<*mut T>, size("ptr"));
 #[unstable(feature = "generic_atomic", issue = "130539")]
 #[repr(C)]
 #[rustc_diagnostic_item = "Atomic"]
+#[derive(Debug)]
 pub struct Atomic<T: AtomicPrimitive> {
     v: UnsafeCell<T::Storage>,
 }
