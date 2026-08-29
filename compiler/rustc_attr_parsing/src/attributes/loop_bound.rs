@@ -11,7 +11,12 @@ pub(crate) struct LoopBoundParser;
 impl SingleAttributeParser for LoopBoundParser {
     const PATH: &[Symbol] = &[sym::loop_bound];
     const ON_DUPLICATE: OnDuplicate = OnDuplicate::Error;
-    const ALLOWED_TARGETS: AllowedTargets<'_> = AllowedTargets::AllowList(&[Allow(Target::Expression)]);
+    const ALLOWED_TARGETS: AllowedTargets<'_> = AllowedTargets::AllowList(&[
+        Allow(Target::Expression),
+        Allow(Target::Loop),
+        Allow(Target::ForLoop),
+        Allow(Target::While),
+    ]);
     const TEMPLATE: AttributeTemplate = template!(
         List: &[r#"min = "value", max = "value""#],
         "Loop bound attribute for passing bounds to LLVM"
