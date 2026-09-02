@@ -22,7 +22,11 @@ git submodule update --init --recursive
 
 # Check the Rust build system is working.
 ./x.py check
+```
 
+**For Apple Silicon (aarch64-apple-darwin):**
+
+```zsh
 # Build Patmos target.
 ./x.py build --stage 1 library/core --target="patmos-unknown-none,aarch64-apple-darwin"
 ./x.py build --stage 1 library/std --target="patmos-unknown-none,aarch64-apple-darwin"
@@ -30,6 +34,18 @@ git submodule update --init --recursive
 # If you want to build the Miri interpreter as well
 ./x.py build --stage 1 src/tools/miri --target="patmos-unknown-none,aarch64-apple-darwin"
 ./x.py build --stage 1 --target="patmos-unknown-none,aarch64-apple-darwin"
+```
+
+**For x86_64 hosts (Linux):**
+
+```zsh
+# Replace x86_64-unknown-linux-gnu with x86_64-apple-darwin if on macOS
+./x.py build --stage 1 library/core --target="patmos-unknown-none,x86_64-unknown-linux-gnu"
+./x.py build --stage 1 library/std --target="patmos-unknown-none,x86_64-unknown-linux-gnu"
+./x.py build --stage 1 src/tools/cargo --target="patmos-unknown-none,x86_64-unknown-linux-gnu"
+# If you want to build the Miri interpreter as well
+./x.py build --stage 1 src/tools/miri --target="patmos-unknown-none,x86_64-unknown-linux-gnu"
+./x.py build --stage 1 --target="patmos-unknown-none,x86_64-unknown-linux-gnu"
 ```
 
 Attach it to your toolchain:
