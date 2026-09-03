@@ -311,6 +311,9 @@ pub(crate) fn to_llvm_features<'a>(sess: &Session, s: &'a str) -> Option<LLVMFea
                         TargetFeatureFoldStrength::Both("zu"),
                     ],
                 )),
+                // Need to deliberately remove this feature
+                // because x86 machine's won't be able to build with this feature enabled.
+                "amx-tf32" => None,
                 s => Some(LLVMFeature::new(s)),
             }
         }
@@ -495,7 +498,7 @@ fn print_target_cpus(sess: &Session, tm: &llvm::TargetMachine, out: &mut String)
     let cpu_names = llvm::build_string(|s| unsafe {
         llvm::LLVMRustPrintTargetCPUs(&tm, s);
     })
-    .unwrap();
+        .unwrap();
 
     struct Cpu<'a> {
         cpu_name: &'a str,
