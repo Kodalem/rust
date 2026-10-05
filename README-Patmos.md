@@ -84,6 +84,20 @@ How to rebuild the PML fast
 cmake --build build --target LLVMPatmosCodeGen
 ```
 
+### Shrimple cargo build did not work?
+
+If you are hit with some linking issues like these...
+
+```bash
+error: linking with `/Volumes/SSD-99/Master_Thesis/llvm-project/build/bin/ld.lld` failed: exit status: 1
+  |
+  = note:  "/Volumes/SSD-99/Master_Thesis/llvm-project/build/bin/ld.lld" "-flavor" "gnu" "<1 object files omitted>" "--as-needed" "-Bstatic" "<sysroot>/lib/rustlib/patmos-unknown-none/lib/{libcore-*,libcompiler_builtins-*}.rlib" "-L" "/Volumes/SSD-99/Master_Thesis/rust/template_playground/template_patmos/target/patmos-unknown-none/debug/build/template_patmos/6d7af3c723f56fdc/out/rustcG3jAgI/raw-dylibs" "-Bdynamic" "-z" "noexecstack" "-o" "/Volumes/SSD-99/Master_Thesis/rust/template_playground/template_patmos/target/patmos-unknown-none/debug/build/template_patmos/6d7af3c723f56fdc/out/template_patmos" "--gc-sections" "-O1"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: ld.lld: error: /Volumes/SSD-99/Master_Thesis/rust/build/aarch64-apple-darwin/stage1/lib/rustlib/patmos-unknown-none/lib/libcompiler_builtins-511f10a838703ca7.rlib(lib.rmeta): not an ELF file
+```
+
+Please make sure that the LLVM toolchain that is the `.cargo/config.toml` (or `.env`) file is pointing to the LLVM build that Rust is following, as in use the Rust fork of LLVM than the LLVM proper!
+
 ### C++ link fails with "member of archive is not a bitcode file"
 
 If `clang` fails with something like:
@@ -98,7 +112,7 @@ a native ELF object.
 
 This happens when compiler-rt gets built with the wrong toolchain pointed at
 by `CMAKE_PROGRAM_PATH` — for example a `build-compiler-rt/CMakeCache.txt`
-left over from configuring against a *different* LLVM checkout's
+left over from configuring against a _different_ LLVM checkout's
 `build/bin`. When that happens, compiler-rt silently compiles to native
 objects instead of bitcode, and copying the result into `librt.a` gives you
 this exact error. (This took hours to resolve)
@@ -125,7 +139,7 @@ cmake ../compiler-rt \
 make -j4
 ```
 
-`CMAKE_PROGRAM_PATH` must point at *this same tree's* `build/bin` — not
+`CMAKE_PROGRAM_PATH` must point at _this same tree's_ `build/bin` — not
 another LLVM checkout's. That's the whole bug, every time.
 
 Then install the result:

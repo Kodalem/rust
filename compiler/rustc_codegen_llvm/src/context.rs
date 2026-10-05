@@ -1084,11 +1084,17 @@ impl<'ll> CodegenCx<'ll, '_> {
             // Add attributes to prevent optimization (matching Clang's behavior).
             // These are critical to ensure the intrinsic isn't optimized away before
             // the Patmos PML export pass can process it.
-            // Use string attributes for those not in AttributeKind enum
+            // `noduplicate` MUST be emitted as the recognized enum attribute (like
+            // Clang does), not as a string attribute: LLVM's LoopRotate consults
+            // `hasFnAttr(Attribute::NoDuplicate)` (an enum-namespace query) via
+            // CodeMetrics/CallBase::cannotDuplicate(), and a string attribute is
+            // invisible to that query -- letting LoopRotate rotate annotated loops
+            // and change the loop shape Patmos/Platin analyze.
+            // Use string attributes for the others not in AttributeKind enum.
             use llvm::AttributePlace::Function;
             let attrs = [
                 llvm::CreateAttrString(self.scx.llcx, "convergent"),
-                llvm::CreateAttrString(self.scx.llcx, "noduplicate"),
+                llvm::AttributeKind::NoDuplicate.create_attr(self.scx.llcx),
                 llvm::AttributeKind::NoInline.create_attr(self.scx.llcx),
                 llvm::CreateAttrString(self.scx.llcx, "norecurse"),
                 llvm::CreateAttrString(self.scx.llcx, "nomerge"),
